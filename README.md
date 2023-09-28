@@ -20,4 +20,6 @@ Quiz 8
 
    The **coding technique** I will use is **Loopers**, which can assist in realizing interactive and animated lines. Loopers will be used to create multiple line objects. Locations, movement trajectories, colors, and other attributes of line objects will be defined according to the image so that the converging lines may form desired patterns. The positions and angles of these lines should be updated at different frames to achieve dynamic and animated effects. And mouse event functions will be added to realize the interactive effect. For example, when click the mouse, the speed of the line movement changes.
 
+   ![Image for coding technique](readmeImages/Coding_image.jpeg)
+
    [Coding technique example link](https://happycoding.io/tutorials/p5js/creating-classes/loopers)
