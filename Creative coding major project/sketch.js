@@ -1,6 +1,15 @@
 let radii;//Define an array and use it to store the radii of concentric circles.
 let colorsList = []; // Define a two-dimensional array and use it to store the colours at each position.
 let bottomMargin = 50; // Define the height of the bottom gap
+// Add FFT objects to the individual audio part
+let song;
+let fft;
+let originalRadii = [110, 60, 35];
+
+// Load sound
+function preload() {
+  song = loadSound("audio/Under_the_Stars.mp3");
+}
 
 function setup() {
   let canvasHeight = windowHeight - bottomMargin; // Leave some space between the bottom of the canvas and the window for adding interactive instruction sentences and buttons
@@ -20,6 +29,18 @@ function setup() {
   // Initialize a set of redii for concentric circles
   radii = [hexagonSize * 0.4, hexagonSize * 0.25, hexagonSize * 0.1];
   redraw();
+
+  // Initialize FFT object
+  fft = new p5.FFT();
+  song.connect(fft);
+  
+  // Add an play/pause button for playing music
+  let button = createButton('Play/Pause');
+  button.position(350, 100);
+  button.mousePressed(togglePlay);
+  
+  // Set the size of the user interaction instruction text
+  textSize(20);
 }
 
 // Adjust the size of the canvas when the window is resized
@@ -229,14 +250,43 @@ function makeGrid() {
   }
 }
 
+// Add togglePlay function
+function togglePlay() {
+  if (song.isPlaying()) {
+    song.pause();
+  } else {
+    song.play();
+  }
+}
 
 function draw() {
   background(4, 81, 123);//Set canvas color to dark blue
   translate(width / 2, height / 2); // Move the coordinate system to the center of the canvas
+  //Add push() before rotate() to ensure that only the graphics and not the text are rotated
+  push(); // Save current state
   rotate(15);// Rotate the entire canvas 15 degrees to fit the design of the original image
   stroke(255);// Set the stroke color to white
   noFill();
-  makeGrid();// Use the makeGrid function
+  
+
+  fft.analyze();
+  // Extract low frequency energy
+  let bassEnergy = fft.getEnergy("bass");
+  for (let i = 0; i < radii.length; i++){
+    radii[i] = map(bassEnergy, 0, 255, originalRadii[i] * 0.85, originalRadii[i] * 1.2);
+  }
+  
+  // Move makeGrid() to the back to ensure that the grid and other patterns can be displayed before the music plays
+  makeGrid();
+  pop(); // Restore previously saved state
+
+  // Here determines the status of the audio context and displays the text
+  if (getAudioContext().state !== 'running') {
+    push(); // Save current state
+    fill(255);
+    text('tap here to play some sound!', -380, -290, width - 20);
+  }
 }
+
 
 //This code is debuged by ChatGPT
