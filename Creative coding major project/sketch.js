@@ -1,14 +1,15 @@
 let radii;//Define an array and use it to store the radii of concentric circles.
 let colorsList = []; // Define a two-dimensional array and use it to store the colours at each position.
+let bottomMargin = 50; // Define the height of the bottom gap
 
 function setup() {
-  let canvas = createCanvas(windowWidth, windowHeight); // Create a canvas that fills the window
+  let canvasHeight = windowHeight - bottomMargin; // Leave some space between the bottom of the canvas and the window for adding interactive instruction sentences and buttons
+  let canvas = createCanvas(windowWidth, canvasHeight); // Create a canvas that fills the window
   canvas.style('display', 'block');// Set the display of the canvas to 'block' to avoid layout confusion of the graphics
-  
 
   // Initialize grid width, height and size of hexagons
   gridWidth = windowWidth;
-  gridHeight = windowHeight;
+  gridHeight = canvasHeight;
   hexagonSize = windowWidth/5;
   // Set background color
   background(4, 81, 123);
@@ -22,7 +23,10 @@ function setup() {
 
 // Adjust the size of the canvas when the window is resized
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+  let canvasHeight = windowHeight - bottomMargin; // Leave some space at the bottom of the canvas
+  resizeCanvas(windowWidth, canvasHeight); 
+  gridHeight = windowHeight 
+  redraw();
 }
 
 // Define a function to draw six white dots with orange and brown edges at the vertices of the hexagon
@@ -47,7 +51,7 @@ function drawTwistedLine(cX, cY, r, col, row) {
     pop();
 
     push();
-    noStroke(); // No fill
+    noStroke(); // No stroke
     fill(255); // Set fill color to white
     ellipse(x1, y1, r * 0.1, r * 0.1); // Draw white dotted circles
     pop();
