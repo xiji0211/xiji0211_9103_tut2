@@ -1,10 +1,10 @@
 let radii;//Define an array and use it to store the radii of concentric circles.
 let colorsList = []; // Define a two-dimensional array and use it to store the colours at each position.
-let bottomMargin = 50; // Define the height of the bottom gap
-// Add FFT objects to the individual audio part
+// Add FFT objects to the audio portion of my personal assignment
 let song;
 let fft;
 let originalRadii = [110, 60, 35];
+let musicStatusText = 'Click the button to play the music!'; // Define music status text in global scope
 
 // Load sound
 function preload() {
@@ -12,14 +12,13 @@ function preload() {
 }
 
 function setup() {
-  let canvasHeight = windowHeight - bottomMargin; // Leave some space between the bottom of the canvas and the window for adding interactive instruction sentences and buttons
-  let canvas = createCanvas(windowWidth, canvasHeight); // Create a canvas that fills the window
+  let canvas = createCanvas(windowWidth, windowHeight); // Create a canvas that fills the window
   canvas.style('display', 'block');// Set the display of the canvas to 'block' to avoid layout confusion of the graphics
   
 
   // Initialize grid width, height and size of hexagons
   gridWidth = windowWidth;
-  gridHeight = canvasHeight;
+  gridHeight = windowHeight;
   hexagonSize = windowWidth/5;
   // Set background color
   background(4, 81, 123);
@@ -33,23 +32,17 @@ function setup() {
   // Initialize FFT object
   fft = new p5.FFT();
   song.connect(fft);
-  
-  // Add an play/pause button for playing music
-  let button = createButton('Play/Pause');
-  button.position(350, 100);
+
+  // Add play/ pause button
+  let button = createButton('Play/Pause music');
+  button.position(590, 4);
   button.mousePressed(togglePlay);
   
-  // Set the size of the user interaction instruction text
-  textSize(20);
 }
 
 // Adjust the size of the canvas when the window is resized
 function windowResized() {
-  let canvasHeight = windowHeight - bottomMargin; // Leave space at the bottom of the canvas
-  resizeCanvas(windowWidth, canvasHeight); 
-  gridHeight = windowHeight 
-  redraw();
-
+  resizeCanvas(windowWidth, windowHeight); 
 }
 
 // Define a function to draw six white dots with orange and brown edges at the vertices of the hexagon
@@ -254,8 +247,12 @@ function makeGrid() {
 function togglePlay() {
   if (song.isPlaying()) {
     song.pause();
+    isMusicPlaying = false; // Set music playback status to false 
+    musicStatusText = 'Click the button to play the music!'; // Set the text
   } else {
     song.play();
+    isMusicPlaying = true; // Set music playback status to true
+    musicStatusText = 'Click the button to pause the music!'; // Update the text
   }
 }
 
@@ -280,12 +277,20 @@ function draw() {
   makeGrid();
   pop(); // Restore previously saved state
 
-  // Here determines the status of the audio context and displays the text
-  if (getAudioContext().state !== 'running') {
-    push(); // Save current state
-    fill(255);
-    text('tap here to play some sound!', -380, -290, width - 20);
-  }
+  // Draw a white rectangle on top of all other shapes
+  push(); 
+  rectMode(CENTER); // Set the rectmode to center
+  fill(255); 
+  noStroke();
+  rect(0, -350, width, 90); //Draw a white rec on the top of the canvas
+
+  // Show music playback status text next to button
+  push(); 
+  fill(0);
+  textSize(13); 
+  textStyle(BOLD); 
+  text(musicStatusText, 10, -315); // Display text at the specified position
+  pop(); 
 }
 
 
