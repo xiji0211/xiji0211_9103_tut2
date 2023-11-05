@@ -5,6 +5,7 @@ let song;
 let fft;
 let originalRadii = [110, 60, 35];
 let musicStatusText = 'Click the button to play the music!'; // Define music status text in global scope
+let rotationAngle = 0; // Define the angle variable for rotation
 
 // Load sound
 function preload() {
@@ -27,8 +28,7 @@ function setup() {
 
   // Initialize a set of redii for concentric circles
   radii = [hexagonSize * 0.4, hexagonSize * 0.25, hexagonSize * 0.1];
-  redraw();
-
+  
   // Initialize FFT object
   fft = new p5.FFT();
   song.connect(fft);
@@ -125,7 +125,24 @@ function drawTwistedLine(cX, cY, r, row, col) {
 function drawConcentricCirclesAndDots(cX, cY, radii, row, col) {
   // Get the color list of the current location
   let colors = getColorsForPosition(row, col);
-  new ConcentricCirclesAndDots(cX, cY, radii, colors).draw();
+  push();
+  translate(cX, cY); // Move the coordinate origin to the center of concentric circles
+  // Add the rotation effect
+  rotate(rotationAngle);
+
+  for (let i = 0; i < radii.length; i++) {
+    fill(colors[i + 1]);
+    ellipse(0, 0, radii[i] * 2, radii[i] * 2);
+  }
+
+  let r1 = (radii[0] + radii[1]) / 2 * 0.85;
+  let r2 = r1 * 1.15;
+  let r3 = r2 * 1.15;
+
+  new DottedCircle(0, 0, r1, r1 * 0.1, colors[4]).draw();
+  new DottedCircle(0, 0, r2, r1 * 0.12, colors[5]).draw();
+  new DottedCircle(0, 0, r3, r1 * 0.13, colors[6]).draw();
+  pop();
 }
 
 // Define a class to draw dotted circles
@@ -160,7 +177,7 @@ class ConcentricCirclesAndDots {
     this.cX = cX;
     this.cY = cY;
     this.radii = radii;
-    this.colors = colors;
+    this.colors = colors; 
   }
 
 // Using the center of the hexagon as the center of the circle, 
@@ -233,7 +250,7 @@ function makeGrid() {
     for (let x = offsetX *1.2, col = 0; x < gridWidth; x += hexagonSize * 1.5, col++) {
       let hexCenterX = x + hexagonSize * (count % 2 == 0) * 0.75;
       let hexCenterY = y;
-
+      
       // Call the drawTwistedLine function to draw twisted lines 
       drawTwistedLine(hexCenterX, hexCenterY, hexagonSize / 2, row, col);
       // Call drawConcentricCircles function to draw concentric circles and dotted rings
@@ -257,7 +274,24 @@ function togglePlay() {
 }
 
 function draw() {
-  background(4, 81, 123);//Set canvas color to dark blue
+  background(255, 100);//Set canvas color to dark blue
+  
+  // Get FFT data
+  let spectrum = fft.analyze();
+
+  // Audio amplitude visualization
+  for (let i = 0; i < spectrum.length; i++) {
+    let amp = spectrum[i];
+    let x = map(i, 0, spectrum.length, 0, width); // Mapping X coordinates based on frequency range
+    let h = map(amp, 0, 255, 0, height); // Mapping the height of a rectangle based on amplitude
+    let w = width / spectrum.length * 2; // Calculate the width of a rectangle
+  
+    noStroke(); 
+    fill(0); 
+    rect(x, height - h, w, h); // Draw rectangles
+  }
+  
+
   translate(width / 2, height / 2); // Move the coordinate system to the center of the canvas
   //Add push() before rotate() to ensure that only the graphics and not the text are rotated
   push(); // Save current state
@@ -270,23 +304,30 @@ function draw() {
   // Extract low frequency energy
   let bassEnergy = fft.getEnergy("bass");
   for (let i = 0; i < radii.length; i++){
-    radii[i] = map(bassEnergy, 0, 255, originalRadii[i] * 0.85, originalRadii[i] * 1.2);
+    radii[i] = map(bassEnergy, 0, 255, originalRadii[i] * 0.85, originalRadii[i] * 1.1);
   }
-  
+
+  // Check if the song is playing
+  if (song.isPlaying()) {
+    // Update the rotation angle only when the music is playing
+    let rotationSpeed = 0.5;
+    rotationAngle += rotationSpeed;
+  }
+
   // Move makeGrid() to the back to ensure that the grid and other patterns can be displayed before the music plays
   makeGrid();
   pop(); // Restore previously saved state
 
-  // Draw a white rectangle on top of all other shapes
+  // Draw a balck rectangle on top of all other shapes
   push(); 
   rectMode(CENTER); // Set the rectmode to center
-  fill(255); 
+  fill(0); 
   noStroke();
   rect(0, -350, width, 90); //Draw a white rec on the top of the canvas
 
   // Show music playback status text next to button
   push(); 
-  fill(0);
+  fill(255);
   textSize(13); 
   textStyle(BOLD); 
   text(musicStatusText, 10, -315); // Display text at the specified position
