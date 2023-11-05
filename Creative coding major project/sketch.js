@@ -6,6 +6,7 @@ let fft;
 let originalRadii = [110, 60, 35];
 let musicStatusText = 'Click the button to play the music!'; // Define music status text in global scope
 let rotationAngle = 0; // Define the angle variable for rotation
+let heart;
 
 // Load sound
 function preload() {
@@ -37,7 +38,8 @@ function setup() {
   let button = createButton('Play/Pause music');
   button.position(590, 4);
   button.mousePressed(togglePlay);
-  
+
+  heart = new Heart();
 }
 
 // Adjust the size of the canvas when the window is resized
@@ -237,6 +239,62 @@ function getColorsForPosition(row, col) {
   return colorsList[row][col];
 }
 
+// Define heart class
+class Heart {
+  constructor() {
+    this.x = 0;
+    this.y = 0;
+    this.size = 30;
+    this.color = color(255, 0, 0);
+  }
+
+  // Update the position and color of hearts
+  update(x, y, color) {
+    this.x = x;
+    this.y = y;
+    this.color = color;
+  }
+
+  // Draw hearts
+  display() {
+    push();
+    fill(this.color);
+    stroke(255);
+    strokeWeight(2);
+
+    // Draw two curved lines to form a heart
+    beginShape();
+    vertex(this.x, this.y + this.size / 2);
+    bezierVertex(this.x - this.size / 2, this.y - this.size / 3, this.x - this.size, this.y + this.size / 5, this.x, this.y + this.size);
+    bezierVertex(this.x + this.size, this.y + this.size / 5, this.x + this.size / 2, this.y - this.size / 3, this.x, this.y + this.size / 2);
+    endShape(CLOSE);
+    
+    pop();
+  }
+}
+
+// Draw hearts
+function drawHeart(x, y){
+  let heart = new Heart();
+  let heartColor = getColorFromCentroid(fft.analyze()); // Get color from centroid
+  heart.update(x, y, heartColor); // Update heart position and color
+  heart.display(); 
+}
+
+// Get color from the centroid
+function getColorFromCentroid(spectrum) {
+  // Calculate the centroid based on a specific frequency range
+  // For example, you can use the range 20Hz to 2000Hz
+  let centroid = fft.getCentroid(20, 2000);
+
+  // Map the centroid value to a color
+  let r = map(centroid, 0, 2000, 0, 255); // Adjust the range based on your music
+  let g = 0; // You can set the green component to a constant value
+  let b = 0; // You can set the blue component to a constant value
+
+  return color(r, g, b);
+}
+
 
 function makeGrid() {
   let count = 0;// init counter
@@ -255,6 +313,8 @@ function makeGrid() {
       drawTwistedLine(hexCenterX, hexCenterY, hexagonSize / 2, row, col);
       // Call drawConcentricCircles function to draw concentric circles and dotted rings
       drawConcentricCirclesAndDots(hexCenterX, hexCenterY, radii, row, col);
+      // Draw heats at the center of concentric circles
+      drawHeart(hexCenterX, hexCenterY-15);
     }
     count++;// increment every row
   }
@@ -274,24 +334,23 @@ function togglePlay() {
 }
 
 function draw() {
-  background(255, 100);//Set canvas color to dark blue
+  background(255);//Set canvas color to white
   
   // Get FFT data
   let spectrum = fft.analyze();
 
   // Audio amplitude visualization
   for (let i = 0; i < spectrum.length; i++) {
-    let amp = spectrum[i];
+    let amplitude = spectrum[i];
     let x = map(i, 0, spectrum.length, 0, width); // Mapping X coordinates based on frequency range
-    let h = map(amp, 0, 255, 0, height); // Mapping the height of a rectangle based on amplitude
+    let h = map(amplitude, 0, 255, 0, height); // Mapping the height of a rectangle based on amplitude
     let w = width / spectrum.length * 2; // Calculate the width of a rectangle
-  
+    
     noStroke(); 
     fill(0); 
     rect(x, height - h, w, h); // Draw rectangles
   }
   
-
   translate(width / 2, height / 2); // Move the coordinate system to the center of the canvas
   //Add push() before rotate() to ensure that only the graphics and not the text are rotated
   push(); // Save current state
@@ -331,7 +390,6 @@ function draw() {
   textSize(13); 
   textStyle(BOLD); 
   text(musicStatusText, 10, -315); // Display text at the specified position
-  pop(); 
 }
 
 
