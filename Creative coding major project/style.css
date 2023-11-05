@@ -1,8 +1,27 @@
 html, body {
   margin: 0;
   padding: 0;
+  background-color: #ffffff; 
 }
 
 canvas {
   display: block;
+}
+
+.page {
+  background-color: #000000; 
+  padding-top: 30px; 
+  position: relative;
+}
+
+.content {
+  background-color: #ffffff;
+}
+
+p {
+  font-size: 14px; 
+  color: #ffffff; 
+  position: absolute; 
+  top: -8px; 
+  left: 740px; 
 }

@@ -1,9 +1,13 @@
-let radii;//Define an array and use it to store the radii of concentric circles.
-let colorsList = []; // Define a two-dimensional array and use it to store the colours at each position.
+let radii;//Define an array and use it to store the radii of concentric circles
+let colorsList = []; // Define a two-dimensional array and use it to store the colours at each position
+let gridWidth;
+let gridHeight;
+let hexagonSize;
 // Add FFT objects to the audio portion of my personal assignment
 let song;
 let fft;
-let originalRadii = [110, 60, 35];
+let isMusicPlaying = false;
+let originalRadii;
 let musicStatusText = 'Click the button to play the music!'; // Define music status text in global scope
 let rotationAngle = 0; // Define the angle variable for rotation
 let heart;
@@ -17,18 +21,20 @@ function setup() {
   let canvas = createCanvas(windowWidth, windowHeight); // Create a canvas that fills the window
   canvas.style('display', 'block');// Set the display of the canvas to 'block' to avoid layout confusion of the graphics
   
-
   // Initialize grid width, height and size of hexagons
   gridWidth = windowWidth;
   gridHeight = windowHeight;
   hexagonSize = windowWidth/5;
-  // Set background color
-  background(4, 81, 123);
+  // Set background color to white
+  background(255);
   // Set angle mode to degrees
   angleMode(DEGREES);
 
   // Initialize a set of redii for concentric circles
   radii = [hexagonSize * 0.4, hexagonSize * 0.25, hexagonSize * 0.1];
+  
+  // Initialize originalRadii for resizing
+  originalRadii = [...radii];
   
   // Initialize FFT object
   fft = new p5.FFT();
@@ -45,6 +51,10 @@ function setup() {
 // Adjust the size of the canvas when the window is resized
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight); 
+  // Update concentric circle radius to fit window
+  for (let i = 0; i < radii.length; i++) {
+    radii[i] = originalRadii[i] * (width / gridWidth);
+  }
 }
 
 // Define a function to draw six white dots with orange and brown edges at the vertices of the hexagon
@@ -73,7 +83,6 @@ function drawTwistedLine(cX, cY, r, row, col) {
     fill(255); // Set fill color to white
     ellipse(x1, y1, r * 0.1, r * 0.1); // Draw white dotted circles
     pop();
-
 
     // Draw a hexagonal honeycomb grid of twisted lines
     // Calculate the vertex coordinates of the immediately preceding vertex
@@ -118,7 +127,6 @@ function drawTwistedLine(cX, cY, r, row, col) {
       // Define two control points and end points of another Bezier curve,
       // The order of the control points of this curve is opposite to that of the previous curve to form a staggered line
       endShape();
-
     }
   }
 }
@@ -182,8 +190,8 @@ class ConcentricCirclesAndDots {
     this.colors = colors; 
   }
 
-// Using the center of the hexagon as the center of the circle, 
-// draw three concentric circles and the small dots between the concentric circles
+  // Using the center of the hexagon as the center of the circle, 
+  // draw three concentric circles and the small dots between the concentric circles
   draw() {
     push();
 
@@ -314,7 +322,7 @@ function makeGrid() {
       // Call drawConcentricCircles function to draw concentric circles and dotted rings
       drawConcentricCirclesAndDots(hexCenterX, hexCenterY, radii, row, col);
       // Draw heats at the center of concentric circles
-      drawHeart(hexCenterX, hexCenterY-15);
+      drawHeart(hexCenterX, hexCenterY - 15);
     }
     count++;// increment every row
   }
@@ -325,11 +333,9 @@ function togglePlay() {
   if (song.isPlaying()) {
     song.pause();
     isMusicPlaying = false; // Set music playback status to false 
-    musicStatusText = 'Click the button to play the music!'; // Set the text
   } else {
     song.play();
     isMusicPlaying = true; // Set music playback status to true
-    musicStatusText = 'Click the button to pause the music!'; // Update the text
   }
 }
 
@@ -363,33 +369,20 @@ function draw() {
   // Extract low frequency energy
   let bassEnergy = fft.getEnergy("bass");
   for (let i = 0; i < radii.length; i++){
-    radii[i] = map(bassEnergy, 0, 255, originalRadii[i] * 0.85, originalRadii[i] * 1.1);
+    radii[i] = map(bassEnergy, 0, 255, originalRadii[i] * 0.8, originalRadii[i] * 1.05);
   }
 
   // Check if the song is playing
+  // If it is playing, the concentric circles rotates
   if (song.isPlaying()) {
     // Update the rotation angle only when the music is playing
-    let rotationSpeed = 0.5;
+    let rotationSpeed = 0.7;
     rotationAngle += rotationSpeed;
   }
 
   // Move makeGrid() to the back to ensure that the grid and other patterns can be displayed before the music plays
   makeGrid();
   pop(); // Restore previously saved state
-
-  // Draw a balck rectangle on top of all other shapes
-  push(); 
-  rectMode(CENTER); // Set the rectmode to center
-  fill(0); 
-  noStroke();
-  rect(0, -350, width, 90); //Draw a white rec on the top of the canvas
-
-  // Show music playback status text next to button
-  push(); 
-  fill(255);
-  textSize(13); 
-  textStyle(BOLD); 
-  text(musicStatusText, 10, -315); // Display text at the specified position
 }
 
 
