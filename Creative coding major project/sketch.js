@@ -11,6 +11,8 @@ let originalRadii;
 let musicStatusText = 'Click the button to play the music!'; // Define music status text in global scope
 let rotationAngle = 0; // Define the angle variable for rotation
 let heart;
+let particles = [];
+let numParticles = 150; // Define the number of particles
 
 // Load sound
 function preload() {
@@ -44,8 +46,16 @@ function setup() {
   let button = createButton('Play/Pause music');
   button.position(590, 4);
   button.mousePressed(togglePlay);
-
+  
+  // Create a heart object
   heart = new Heart();
+
+  // Create particles and add them to array
+  for (let i = 0; i < numParticles; i++) {
+    let x = random(width); // Set the random position for particles
+    let y = random(height); 
+    particles.push(new Particle(x, y));
+  }
 }
 
 // Adjust the size of the canvas when the window is resized
@@ -79,8 +89,8 @@ function drawTwistedLine(cX, cY, r, row, col) {
     pop();
 
     push();
-    noStroke(); // No fill
-    fill(255); // Set fill color to white
+    noStroke();
+    fill(255); // Set color to white
     ellipse(x1, y1, r * 0.1, r * 0.1); // Draw white dotted circles
     pop();
 
@@ -303,6 +313,40 @@ function getColorFromCentroid(spectrum) {
   return color(r, g, b);
 }
 
+// Add a particle class
+class Particle {
+  constructor(x, y) {
+    this.position = createVector(x, y); 
+    this.velocity = createVector(random(-1, 1), random(-1, 1)); // Random speed for particles
+    this.color = color(random(255), random(255), random(255)); // Random color
+    this.size = random(5, 20); 
+  }
+
+  update() {
+    // Update the postion of particles 
+    this.position.add(this.velocity);
+
+    // If the particle exceeds the bounds of the canvas, place it back within the canvas
+    if (this.position.x < 0 || this.position.x > width) {
+      this.position.x = random(width);
+    }
+    if (this.position.y < 0 || this.position.y > height) {
+      this.position.y = random(height);
+    }
+  }
+
+  display() {
+    // Draw particles
+    noStroke();
+    fill(this.color);
+    ellipse(this.position.x, this.position.y, this.size, this.size);
+  }
+
+  setSize(newSize) {
+    this.size = newSize;
+  }
+}
+
 
 function makeGrid() {
   let count = 0;// init counter
@@ -355,7 +399,17 @@ function draw() {
     noStroke(); 
     fill(0); 
     rect(x, height - h, w, h); // Draw rectangles
+
+    // 创建对称的波形条，通过斜对角反转
+    let symmetricalX = width - x - w; // 计算对称位置的 X 坐标
+    rect(symmetricalX, 0, w, h); // 绘制对称的矩形
   }
+
+    // Update and display the particles
+    for (let particle of particles) {
+      particle.update();
+      particle.display();
+    }
   
   translate(width / 2, height / 2); // Move the coordinate system to the center of the canvas
   //Add push() before rotate() to ensure that only the graphics and not the text are rotated
@@ -364,13 +418,18 @@ function draw() {
   stroke(255);// Set the stroke color to white
   noFill();
   
-
-  fft.analyze();
-  // Extract low frequency energy
+  // Extract low frequency energy from the music
   let bassEnergy = fft.getEnergy("bass");
   for (let i = 0; i < radii.length; i++){
-    radii[i] = map(bassEnergy, 0, 255, originalRadii[i] * 0.8, originalRadii[i] * 1.05);
+    radii[i] = map(bassEnergy, 0, 255, originalRadii[i] * 0.75, originalRadii[i] * 1.05);
   }
+
+  // Update the size of particles according to the low frequency energy from the music
+  for (let particle of particles) {
+    // Adjust the particle size based on the bass energy
+    let newSize = map(bassEnergy, 0, 255, 10, 80); // Adjust the range as needed
+    particle.setSize(newSize);
+  }  
 
   // Check if the song is playing
   // If it is playing, the concentric circles rotates
