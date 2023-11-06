@@ -122,7 +122,7 @@ function drawTwistedLine(cX, cY, r, row, col) {
       beginShape();
       vertex(startX, startY);// Define start points
       bezierVertex(ControlPoint1x, ControlPoint1y, ControlPoint2x, ControlPoint2y, endX, endY);
-      //Define two control points and end points of another Bezier curve,
+      //Define two control points and end points of another Bezier curve
       endShape();
 
       // Draw the second Bezier curve
@@ -252,6 +252,7 @@ function getColorsForPosition(row, col) {
   return colorsList[row][col];
 }
 
+// Add more details based on team code
 // Define a heart class 
 class Heart {
   constructor() {
@@ -272,7 +273,7 @@ class Heart {
   display() {
     push();
     fill(this.color);
-    stroke(255);
+    stroke(255); // Set the stroke color to white
     strokeWeight(2);
 
     // Using Bezier curves to draw hearts
@@ -289,7 +290,7 @@ class Heart {
 // Draw hearts
 function drawHeart(x, y){
   let heart = new Heart();
-  let heartColor = getColorFromCentroid(fft.analyze()); // Get color from centroid
+  let heartColor = getColorFromCentroid(fft.analyze()); // Get color from the centroid
   heart.update(x, y, heartColor); // Update the position and color of hearts
   heart.display(); 
 }
@@ -307,6 +308,7 @@ function getColorFromCentroid(spectrum) {
   return color(r, g, b);
 }
 
+// Add more details based on group code
 // Add a particle class
 class Particle {
   constructor(x, y) {
@@ -329,8 +331,8 @@ class Particle {
     }
   }
 
+  // Draw elliptical particles
   display() {
-    // Draw particles
     noStroke();
     fill(this.color);
     ellipse(this.position.x, this.position.y, this.size, this.size);
@@ -370,17 +372,15 @@ function makeGrid() {
 function togglePlay() {
   if (song.isPlaying()) {
     song.pause();
-    isMusicPlaying = false; // When the song is paused, set music playback status to false 
   } else {
     song.play();
-    isMusicPlaying = true; // When the song is playing, set music playback status to true
   }
 }
 
 function draw() {
   background(255); // Set canvas color to white
   
-  // Get FFT data
+  // Request fresh data from the FFT analysis
   let spectrum = fft.analyze();
 
   // Audio amplitude visualization
@@ -393,12 +393,12 @@ function draw() {
     // Use the rectangle bars as a background that can change with the music
     noStroke(); 
     fill(0); 
-    rect(x, height - h, w, h); // Draw rectangles for audio amplitude visualization
+    rect(x, height - h, w, h); // Draw black rectangles for audio amplitude visualization
 
     // Create symmetrical wavy bars by inverting them diagonally
     // Rich background patterns
     let symmetricalX = width - x - w; // Calculate the X coordinate of the symmetry position
-    rect(symmetricalX, 0, w, h); // Draw rectangles
+    rect(symmetricalX, 0, w, h); // Draw black rectangles for audio amplitude visualization
   }
     
   // Add particles to rich background patterns
@@ -409,7 +409,7 @@ function draw() {
   }
   
   translate(width / 2, height / 2); // Move the coordinate system to the center of the canvas
-  //Add push() before rotate() to ensure that only the graphics and not the text are rotated
+  //Add push() before rotate() to ensure that only the graphics are rotated
   push(); // Save current state
   rotate(15);// Rotate the entire canvas 15 degrees to fit the design of the original image
   stroke(255);// Set the stroke color to white
@@ -417,9 +417,11 @@ function draw() {
   
   // Extract low frequency energy from the music
   let bassEnergy = fft.getEnergy("bass");
+  // The radius of the concentric circles changes according to the low frequency energy
   for (let i = 0; i < radii.length; i++){
+    // Give a maximum and minimum value to the radius of the concentric circles
     radii[i] = map(bassEnergy, 0, 255, originalRadii[i] * 0.75, originalRadii[i] * 1.05);
-  }
+  } 
 
   // Update the size of particles according to the low frequency energy from the music
   for (let particle of particles) {
