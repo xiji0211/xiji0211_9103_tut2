@@ -2,11 +2,11 @@ let radii;//Define an array and use it to store the radii of concentric circles
 let colorsList = []; // Define a two-dimensional array and use it to store the colours at each position
 let hexagonSize;
 let song;
-let fft; // Add FFT objects to the audio portion of my personal assignment
+let fft; // Add FFT objects for the audio portion of my individual part
 let originalRadii;
-let rotationAngle = 0; // Define the angle variable for rotation
-let heart;
-let particles = [];
+let rotationAngle = 0; // Define the angle variable for adding rotation animation
+let heart; // Define a heart variable
+let particles = []; // Define an array to store Particle objects
 let numParticles = 150; // Define the number of particles
 
 // Load sound
@@ -56,7 +56,7 @@ function setup() {
 // Adjust the size of the canvas when the window is resized
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight); 
-  // Update concentric circle radius to fit window
+  // Update concentric circle radius to fit the window
   for (let i = 0; i < radii.length; i++) {
     radii[i] = originalRadii[i] * (width / gridWidth);
   }
@@ -75,11 +75,11 @@ function drawTwistedLine(cX, cY, r, row, col) {
     let x1 = cX + r * cos(a);
     let y1 = cY + r * sin(a);
 
-    // Draw a white circle and a larger brown concentric circle at each vertex, then set the stroke to orange.
+    // Draw a white circle and a larger brown concentric circle at each vertex, then set the stroke to orange
     push();
     strokeWeight(3); // Set the strokeWeight to 3
     stroke(255, 100, 0); // Set the stroke color to orange
-    fill(101, 67, 33); // Set fill color to dark brown
+    fill(101, 67, 33); // Set the fill color to dark brown
     ellipse(x1, y1, r * 0.2, r * 0.2); // Draw dark brown concentric circles
     pop();
 
@@ -142,7 +142,7 @@ function drawConcentricCirclesAndDots(cX, cY, radii, row, col) {
   let colors = getColorsForPosition(row, col);
   push();
   translate(cX, cY); // Move the coordinate origin to the center of concentric circles
-  // Add the rotation effect
+  // Add the rotation animation
   rotate(rotationAngle);
 
   for (let i = 0; i < radii.length; i++) {
@@ -221,7 +221,7 @@ class ConcentricCirclesAndDots {
   }
 }
 
-// Fill wrapped lines, concentric circles, and dots with random colors:
+// Fill wrapped lines, concentric circles, and dots with random colors
 // Get the color based on the row and column position of the grid, if no color is stored, generate the color and store it
 function getColorsForPosition(row, col) {
   // If the current row does not store colors, create a new empty list to store the colors
@@ -252,7 +252,7 @@ function getColorsForPosition(row, col) {
   return colorsList[row][col];
 }
 
-// Add more details based on team code
+// Add more details based on grouo code
 // Define a heart class 
 class Heart {
   constructor() {
@@ -290,21 +290,18 @@ class Heart {
 // Draw hearts
 function drawHeart(x, y){
   let heart = new Heart();
-  let heartColor = getColorFromCentroid(fft.analyze()); // Get color from the centroid
+  let heartColor = getColorFromCentroid(fft.analyze()); // Get color from the spectral centroid
   heart.update(x, y, heartColor); // Update the position and color of hearts
   heart.display(); 
 }
 
-// Get color from the centroid
-function getColorFromCentroid(spectrum) {
-  // Calculate the centroid 
-  let centroid = fft.getCentroid();
-  
-  let minCentroid = min(spectrum);
-  let maxCentroid = max(spectrum);
+// Get color from the spectral centroid
+function getColorFromCentroid() {
+  // Calculate the spectral centroid 
+  let centroid = fft.getCentroid(0, 2000);
 
-  // Map the centroid value to the color of hearts
-  let r = map(centroid, minCentroid, maxCentroid, 0, 255); // Only set the red color to realize a red heart
+  // Map the spectral centroid value to the color of hearts
+  let r = map(centroid, 0, 2000, 0, 255); // Only map the red color to realize a red heart
   let g = 0; 
   let b = 0; 
 
@@ -389,16 +386,16 @@ function draw() {
   // Audio amplitude visualization
   for (let i = 0; i < spectrum.length; i++) {
     let amplitude = spectrum[i];
-    let x = map(i, 0, spectrum.length, 0, width); // Mapping X coordinates based on frequency range
-    let h = map(amplitude, 0, 255, 0, height); // Mapping the height of a rectangle based on amplitude
+    let x = map(i, 0, spectrum.length, 0, width); // Map X coordinates based on audio frequency range
+    let h = map(amplitude, 0, 255, 0, height); // Map the height of a rectangle based on amplitude
     let w = width / spectrum.length * 2; // Calculate the width of a rectangle
     
-    // Use the rectangle bars as a background that can change with the music
+    // Use the rectangle bars as a part of background that can change with the music
     noStroke(); 
     fill(0); 
     rect(x, height - h, w, h); // Draw black rectangles for audio amplitude visualization
 
-    // Create symmetrical wavy bars by inverting them diagonally
+    // Create symmetrical rectangle bars by inverting them diagonally
     // Rich background patterns
     let symmetricalX = width - x - w; // Calculate the X coordinate of the symmetry position
     rect(symmetricalX, 0, w, h); // Draw black rectangles for audio amplitude visualization
@@ -418,7 +415,7 @@ function draw() {
   stroke(255);// Set the stroke color to white
   noFill();
   
-  // Extract low frequency energy from the music
+  // Extract the low frequency energy from the music
   let bassEnergy = fft.getEnergy("bass");
   // The radius of the concentric circles changes according to the low frequency energy
   for (let i = 0; i < radii.length; i++){
@@ -426,7 +423,7 @@ function draw() {
     radii[i] = map(bassEnergy, 0, 255, originalRadii[i] * 0.75, originalRadii[i] * 1.05);
   } 
 
-  // Update the size of particles according to the low frequency energy from the music
+  // The radius of particles changes according to the low frequency energy from the music
   for (let particle of particles) {
     // Adjust the particle size based on the bass energy
     let newSize = map(bassEnergy, 0, 255, 10, 80); 
