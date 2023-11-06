@@ -1,12 +1,8 @@
 let radii;//Define an array and use it to store the radii of concentric circles
 let colorsList = []; // Define a two-dimensional array and use it to store the colours at each position
-let gridWidth;
-let gridHeight;
 let hexagonSize;
-// Add FFT objects to the audio portion of my personal assignment
 let song;
-let fft;
-let isMusicPlaying = false;
+let fft; // Add FFT objects to the audio portion of my personal assignment
 let originalRadii;
 let rotationAngle = 0; // Define the angle variable for rotation
 let heart;
@@ -41,7 +37,7 @@ function setup() {
   fft = new p5.FFT();
   song.connect(fft);
 
-  // Add play/ pause button
+  // Add a button for playing or pausing the music
   let button = createButton('Play/Pause music');
   button.position(590, 4);
   button.mousePressed(togglePlay);
@@ -164,7 +160,7 @@ function drawConcentricCirclesAndDots(cX, cY, radii, row, col) {
   pop();
 }
 
-// Define a class to draw dotted circles
+// Define a class to draw dotted circles on the concentric circles
 class DottedCircle {
   constructor(cX, cY, r, dotRadius, color) {
     this.cX = cX;
@@ -256,7 +252,7 @@ function getColorsForPosition(row, col) {
   return colorsList[row][col];
 }
 
-// Define heart class
+// Define a heart class 
 class Heart {
   constructor() {
     this.x = 0;
@@ -272,14 +268,14 @@ class Heart {
     this.color = color;
   }
 
-  // Draw hearts
+  // Draw hearts on the centers of concentric circles
   display() {
     push();
     fill(this.color);
     stroke(255);
     strokeWeight(2);
 
-    // Draw two curved lines to form a heart
+    // Using Bezier curves to draw hearts
     beginShape();
     vertex(this.x, this.y + this.size / 2);
     bezierVertex(this.x - this.size / 2, this.y - this.size / 3, this.x - this.size, this.y + this.size / 5, this.x, this.y + this.size);
@@ -294,20 +290,19 @@ class Heart {
 function drawHeart(x, y){
   let heart = new Heart();
   let heartColor = getColorFromCentroid(fft.analyze()); // Get color from centroid
-  heart.update(x, y, heartColor); // Update heart position and color
+  heart.update(x, y, heartColor); // Update the position and color of hearts
   heart.display(); 
 }
 
 // Get color from the centroid
 function getColorFromCentroid(spectrum) {
   // Calculate the centroid based on a specific frequency range
-  // For example, you can use the range 20Hz to 2000Hz
-  let centroid = fft.getCentroid(20, 2000);
+  let centroid = fft.getCentroid(10, 2000);
 
-  // Map the centroid value to a color
-  let r = map(centroid, 0, 2000, 0, 255); // Adjust the range based on your music
-  let g = 0; // You can set the green component to a constant value
-  let b = 0; // You can set the blue component to a constant value
+  // Map the centroid value to the color of hearts
+  let r = map(centroid, 0, 2000, 0, 255); // Only set the red color to realize a red heart
+  let g = 0; 
+  let b = 0; 
 
   return color(r, g, b);
 }
@@ -342,7 +337,7 @@ class Particle {
   }
 
   setSize(newSize) {
-    this.size = newSize;
+    this.size = newSize; // Update the size of particles for audio visualization
   }
 }
 
@@ -371,19 +366,19 @@ function makeGrid() {
   }
 }
 
-// Add togglePlay function
+// Add a togglePlay function
 function togglePlay() {
   if (song.isPlaying()) {
     song.pause();
-    isMusicPlaying = false; // Set music playback status to false 
+    isMusicPlaying = false; // When the song is paused, set music playback status to false 
   } else {
     song.play();
-    isMusicPlaying = true; // Set music playback status to true
+    isMusicPlaying = true; // When the song is playing, set music playback status to true
   }
 }
 
 function draw() {
-  background(255);//Set canvas color to white
+  background(255); // Set canvas color to white
   
   // Get FFT data
   let spectrum = fft.analyze();
@@ -395,20 +390,23 @@ function draw() {
     let h = map(amplitude, 0, 255, 0, height); // Mapping the height of a rectangle based on amplitude
     let w = width / spectrum.length * 2; // Calculate the width of a rectangle
     
+    // Use the rectangle bars as a background that can change with the music
     noStroke(); 
     fill(0); 
-    rect(x, height - h, w, h); // Draw rectangles
+    rect(x, height - h, w, h); // Draw rectangles for audio amplitude visualization
 
     // Create symmetrical wavy bars by inverting them diagonally
+    // Rich background patterns
     let symmetricalX = width - x - w; // Calculate the X coordinate of the symmetry position
     rect(symmetricalX, 0, w, h); // Draw rectangles
   }
-
-    // Update and display the particles
-    for (let particle of particles) {
-      particle.update();
-      particle.display();
-    }
+    
+  // Add particles to rich background patterns
+  // Update and display the particles
+  for (let particle of particles) {
+    particle.update();
+    particle.display();
+  }
   
   translate(width / 2, height / 2); // Move the coordinate system to the center of the canvas
   //Add push() before rotate() to ensure that only the graphics and not the text are rotated
@@ -426,21 +424,21 @@ function draw() {
   // Update the size of particles according to the low frequency energy from the music
   for (let particle of particles) {
     // Adjust the particle size based on the bass energy
-    let newSize = map(bassEnergy, 0, 255, 10, 80); // Adjust the range as needed
+    let newSize = map(bassEnergy, 0, 255, 10, 80); 
     particle.setSize(newSize);
   }  
 
   // Check if the song is playing
   // If it is playing, the concentric circles rotates
   if (song.isPlaying()) {
-    // Update the rotation angle only when the music is playing
+    // Give a rotation speed for concentric circles when the music is playing
     let rotationSpeed = 0.7;
     rotationAngle += rotationSpeed;
   }
 
   // Move makeGrid() to the back to ensure that the grid and other patterns can be displayed before the music plays
   makeGrid();
-  pop(); // Restore previously saved state
+  pop(); 
 }
 
 
