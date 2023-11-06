@@ -8,7 +8,6 @@ let song;
 let fft;
 let isMusicPlaying = false;
 let originalRadii;
-let musicStatusText = 'Click the button to play the music!'; // Define music status text in global scope
 let rotationAngle = 0; // Define the angle variable for rotation
 let heart;
 let particles = [];
@@ -400,9 +399,9 @@ function draw() {
     fill(0); 
     rect(x, height - h, w, h); // Draw rectangles
 
-    // 创建对称的波形条，通过斜对角反转
-    let symmetricalX = width - x - w; // 计算对称位置的 X 坐标
-    rect(symmetricalX, 0, w, h); // 绘制对称的矩形
+    // Create symmetrical wavy bars by inverting them diagonally
+    let symmetricalX = width - x - w; // Calculate the X coordinate of the symmetry position
+    rect(symmetricalX, 0, w, h); // Draw rectangles
   }
 
     // Update and display the particles
