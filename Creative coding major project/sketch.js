@@ -297,11 +297,14 @@ function drawHeart(x, y){
 
 // Get color from the centroid
 function getColorFromCentroid(spectrum) {
-  // Calculate the centroid based on a specific frequency range
-  let centroid = fft.getCentroid(10, 2000);
+  // Calculate the centroid 
+  let centroid = fft.getCentroid();
+  
+  let minCentroid = min(spectrum);
+  let maxCentroid = max(spectrum);
 
   // Map the centroid value to the color of hearts
-  let r = map(centroid, 0, 2000, 0, 255); // Only set the red color to realize a red heart
+  let r = map(centroid, minCentroid, maxCentroid, 0, 255); // Only set the red color to realize a red heart
   let g = 0; 
   let b = 0; 
 
